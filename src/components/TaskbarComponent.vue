@@ -1,112 +1,190 @@
 <template>
   <div class="taskbar">
-    <!-- Start Button -->
-    <button class="start-button" @click="$emit('toggleStartMenu')">Start</button>
-    
-    <!-- Taskbar Windows -->
+    <div class="start-button" @click="toggleStartMenu">
+  <img :src="require('@/assets/win95.png')" alt="Start" />
+  Start
+</div>
+
+
+    <div v-if="isStartMenuOpen" class="start-menu">
+      <div class="social-media-links">
+        <a v-for="item in socialMediaItems" :key="item.name" :href="item.url" target="_blank">
+          <img :src="item.icon" :alt="item.name" />
+          {{ item.name }}
+        </a>
+      </div>
+    </div>
+
     <div class="taskbar-windows">
       <div
         v-for="window in windows"
         :key="window.id"
-        class="taskbar-item"
-        :class="{ active: window.id === activeWindowId }"
-        @click="$emit('setActiveWindow', window.id)"
+        class="taskbar-window"
+        :class="{ active: window.isActive }"
+        @click="toggleWindow(window.id)"
       >
         {{ window.title }}
       </div>
     </div>
-    
-    <!-- Clock -->
-    <div class="clock">
+
+    <div class="taskbar-clock">
       {{ currentTime }}
     </div>
   </div>
 </template>
 
 <script>
-import { ref, onMounted } from "vue";
-
 export default {
   name: "TaskbarComponent",
   props: {
     windows: Array,
-    activeWindowId: Number,
   },
-  setup() {
-    const currentTime = ref("");
+  data() {
+    return {
+      isStartMenuOpen: false,
+      socialMediaItems: [
+  {
+    name: "Linkedin",
+    url: "https://facebook.com",
+    icon: require('@/assets/SocialMediaIcons/Linkedin.webp'),
+  },
+  {
+    name: "Github",
+    url: "https://twitter.com",
+    icon: require('@/assets/SocialMediaIcons/Github.webp'),
+  }
+],
 
-    // Function to update the time
-    const updateTime = () => {
-      const now = new Date();
-      currentTime.value = now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+      currentTime: this.getCurrentTime(),
     };
-
-    // Update the clock every second
-    onMounted(() => {
-      updateTime();
-      setInterval(updateTime, 1000);
-    });
-
-    return { currentTime };
+  },
+  methods: {
+    toggleStartMenu() {
+      this.isStartMenuOpen = !this.isStartMenuOpen;
+    },
+    toggleWindow(id) {
+      this.$emit("toggleWindow", id);
+    },
+    getCurrentTime() {
+      const now = new Date();
+      return now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    },
+  },
+  mounted() {
+    this.timeInterval = setInterval(() => {
+      this.currentTime = this.getCurrentTime();
+    }, 1000);
+  },
+  beforeUnmount() {
+    clearInterval(this.timeInterval);
   },
 };
 </script>
 
 <style scoped>
 .taskbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: #c0c0c0;
-  padding: 5px;
   position: fixed;
   bottom: 0;
-  width: 100%;
-  border-top: 1px solid #000;
-  box-sizing: border-box;
+  left: 0;
+  right: 0;
+  height: 40px;
+  background: #c0c0c0;
+  border-top: 2px solid #808080;
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  z-index: 1000;
 }
 
 .start-button {
   background: #0078d7;
-  color: #fff;
-  border: none;
+  color: white;
+  font-weight: bold;
   padding: 5px 10px;
+  margin-right: 10px;
+  display: flex;
+  align-items: center;
   cursor: pointer;
-  flex-shrink: 0; /* Ensure the button doesn't shrink */
+  border: 1px solid #0055a5;
+}
+
+.start-button img {
+  width: 20px;
+  height: 20px;
+  margin-right: 5px;
 }
 
 .start-button:hover {
-  background: #005a9e;
+  background: #0055a5;
+}
+
+.start-menu {
+  position: absolute;
+  bottom: 45px;
+  left: 0;
+  background: #f0f0f0;
+  border: 1px solid #808080;
+  padding: 10px;
+  width: 200px;
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+.social-media-links {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.social-media-links a {
+  text-decoration: none;
+  color: black;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 5px;
+  border: 1px solid transparent;
+}
+
+.social-media-links a:hover {
+  background: #e0e0e0;
+  border: 1px solid #808080;
+}
+
+.social-media-links img {
+  width: 20px;
+  height: 20px;
 }
 
 .taskbar-windows {
-  flex: 1; /* Allow windows section to grow and take up remaining space */
   display: flex;
-  margin: 0 10px;
-  overflow-x: auto; /* Enable scrolling if content overflows */
+  gap: 5px;
+  flex-grow: 1;
 }
 
-.taskbar-item {
+.taskbar-window {
+  background: #e0e0e0;
+  border: 1px solid #808080;
   padding: 5px 10px;
   cursor: pointer;
-  background: #e0e0e0;
-  margin-right: 5px;
-  white-space: nowrap; /* Prevent text wrapping */
-  flex-shrink: 0; /* Prevent shrinking of individual taskbar items */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.taskbar-item.active {
+.taskbar-window.active {
   background: #0078d7;
-  color: #fff;
+  color: white;
+  border-color: #0055a5;
 }
 
-.clock {
-  font-family: "Courier New", Courier, monospace;
-  font-size: 14px;
-  color: #000;
-  flex-shrink: 0; /* Keep the clock from shrinking */
-  white-space: nowrap; /* Prevent time from breaking into multiple lines */
-  margin-right: 20px; /* Push the clock to the far right */
-  text-align: right;
+.taskbar-window:hover {
+  background: #a8a8a8;
+}
+
+.taskbar-clock {
+  background: #e0e0e0;
+  border: 1px solid #808080;
+  padding: 5px 10px;
+  font-weight: bold;
 }
 </style>

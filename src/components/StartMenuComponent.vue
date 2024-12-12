@@ -1,9 +1,14 @@
 <template>
-  <div v-if="isOpen" class="start-menu">
-    <ul>
-      <li v-for="item in menuItems" :key="item.name" @click="item.action">
-        <img :src="item.image" alt="Menu icon" />
-        {{ item.name }}
+  <div class="start-menu">
+    <div class="start-menu-header">Programs</div>
+    <ul class="start-menu-list">
+      <li
+        v-for="window in windows"
+        :key="window.id"
+        @click="openWindow(window.id)"
+        class="start-menu-item"
+      >
+        {{ window.title }}
       </li>
     </ul>
   </div>
@@ -11,22 +16,16 @@
 
 <script>
 export default {
-  name: 'StartMenu',
+  name: "StartMenu",
   props: {
-    isOpen: Boolean,
-  },
-  data() {
-    return {
-      menuItems: [
-        { name: 'My Documents', image: require('@/assets/folder.png'), action: () => this.$emit('openWindow', 1) },
-        { name: 'Control Panel', image: require('@/assets/photos.png'), action: () => this.$emit('openWindow', 2) },
-        { name: 'Shut Down', image: require('@/assets/logo.png'), action: this.shutDown },
-      ],
-    };
+    windows: Array,
   },
   methods: {
-    shutDown() {
-      alert('Shutting down...');
+    openWindow(id) {
+      this.$emit("openWindow", id);
+    },
+    restoreWindow(id) {
+      this.$emit("restoreWindow", id);
     },
   },
 };
@@ -34,30 +33,37 @@ export default {
 
 <style scoped>
 .start-menu {
-  position: absolute;
-  bottom: 40px;
+  position: fixed;
+  bottom: 50px;
   left: 0;
-  background: #fff;
-  border: 1px solid #000;
   width: 200px;
+  background: #c0c0c0;
+  border: 1px solid black;
+  box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.5);
+  z-index: 1000;
 }
-ul {
+
+.start-menu-header {
+  background: #0078d7;
+  color: white;
+  padding: 10px;
+  font-weight: bold;
+  text-align: center;
+}
+
+.start-menu-list {
   list-style: none;
   margin: 0;
   padding: 0;
 }
-li {
-  display: flex;
-  align-items: center;
+
+.start-menu-item {
   padding: 10px;
   cursor: pointer;
 }
-img {
-  margin-right: 10px;
-  width: 20px;
-  height: 20px;
-}
-li:hover {
-  background: #ddd;
+
+.start-menu-item:hover {
+  background: #0078d7;
+  color: white;
 }
 </style>

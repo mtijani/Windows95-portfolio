@@ -1,110 +1,134 @@
 <template>
-  <div id="app" class="desktop">
-    <div class="desktop-icons">
-      <DesktopIcon
-        v-for="icon in desktopIcons"
-        :key="icon.id"
-        :icon="icon"
-        @openWindow="openWindow"
-      />
-    </div>
-    <TaskbarComponent
-      :windows="windows"
-      :activeWindowId="activeWindowId"
-      @toggleStartMenu="toggleStartMenu"
-      @setActiveWindow="setActiveWindow"
-    />
-    <StartMenu
-      :isOpen="isStartMenuOpen"
+  <div class="desktop">
+    <!-- Desktop Icons -->
+    <DesktopIcon
+      v-for="icon in icons"
+      :key="icon.id"
+      :icon="icon"
       @openWindow="openWindow"
     />
-    <div v-for="window in windows" :key="window.id">
-      <WindowComponent
-        :window="window"
-        :isActive="window.id === activeWindowId"
-        @closeWindow="closeWindow"
-      />
-    </div>
+    
+    <!-- Windows -->
+    <WindowComponent
+      v-for="window in openWindows"
+      :key="window.id"
+      :window="window"
+      :isActive="activeWindowId === window.id"
+      @closeWindow="closeWindow"
+      @minimizeWindow="minimizeWindow"
+      @dragWindow="updateWindowPosition"
+      @mousedown="setActiveWindow(window.id)"
+    />
+    
+    <!-- Taskbar -->
+    <TaskbarComponent
+      :windows="minimizedWindows.concat(openWindows)"
+      :activeWindowId="activeWindowId"
+      @restoreWindow="restoreWindow"
+      @toggleStartMenu="toggleStartMenu"
+    />
+    
+    <!-- Start Menu -->
+    <StartMenu
+      v-if="isStartMenuOpen"
+      :windows="openWindows"
+      @openWindow="openWindow"
+      @restoreWindow="restoreWindow"
+    />
   </div>
 </template>
 
 <script>
-import { ref } from 'vue';
-import DesktopIcon from './components/DesktopIcon.vue';
-import TaskbarComponent from './components/TaskbarComponent.vue';
-import StartMenu from './components/StartMenuComponent.vue';
-import WindowComponent from './components/WindowComponent.vue';
+import DesktopIcon from "./components/DesktopIcon.vue";
+import WindowComponent from "./components/WindowComponent.vue";
+import TaskbarComponent from "./components/TaskbarComponent.vue";
+import StartMenu from "./components/StartMenuComponent.vue";
 
 export default {
-  name: 'App',
+  name: "App",
   components: {
     DesktopIcon,
+    WindowComponent,
     TaskbarComponent,
     StartMenu,
-    WindowComponent,
   },
-  setup() {
-    const isStartMenuOpen = ref(false);
-    const activeWindowId = ref(null);
-    const windows = ref([]);
-    const desktopIcons = ref([
-      { id: 1, name: 'Biography', image: require('@/assets/mail.png')},
-      { id: 2, name: 'WWDC 2023', image: require('@/assets/resume.png') },
-      { id: 3, name: 'Résumé', image: require('@/assets/photos.png') },
-    ]);
-
-    const toggleStartMenu = () => {
-      isStartMenuOpen.value = !isStartMenuOpen.value;
-    };
-
-    const openWindow = (id) => {
-      const existingWindow = windows.value.find((win) => win.id === id);
-      if (!existingWindow) {
-        const newWindow = desktopIcons.value.find((icon) => icon.id === id);
-        windows.value.push({ id: newWindow.id, title: newWindow.name });
-      }
-      activeWindowId.value = id;
-      isStartMenuOpen.value = false; // Close Start Menu when opening a window
-    };
-
-    const setActiveWindow = (id) => {
-      activeWindowId.value = id;
-    };
-
-    const closeWindow = (id) => {
-      windows.value = windows.value.filter((win) => win.id !== id);
-      if (activeWindowId.value === id) {
-        activeWindowId.value = null;
-      }
-    };
-
+  data() {
     return {
-      isStartMenuOpen,
-      activeWindowId,
-      windows,
-      desktopIcons,
-      toggleStartMenu,
-      openWindow,
-      setActiveWindow,
-      closeWindow,
+      icons: [
+        { id: 1, name: "My Computer", image: require("@/assets/bio.png") },
+        { id: 2, name: "Recycle Bin", image: require("@/assets/file.png") },
+      ],
+      openWindows: [],
+      minimizedWindows: [],
+      activeWindowId: null,
+      isStartMenuOpen: false,
     };
+  },
+  methods: {
+    openWindow(id) {
+      const existingWindow = this.openWindows.find((win) => win.id === id);
+
+      if (!existingWindow) {
+        this.openWindows.push({
+          id,
+          title: this.getWindowTitle(id),
+          isMinimized: false,
+          position: { top: 100, left: 100 },
+        });
+      }
+
+      this.setActiveWindow(id);
+      this.isStartMenuOpen = false;
+    },
+    closeWindow(id) {
+      this.openWindows = this.openWindows.filter((win) => win.id !== id);
+      this.activeWindowId = this.openWindows.length
+        ? this.openWindows[this.openWindows.length - 1].id
+        : null;
+    },
+    minimizeWindow(id) {
+      const window = this.openWindows.find((win) => win.id === id);
+      if (window) {
+        window.isMinimized = true;
+        this.minimizedWindows.push(window);
+        this.openWindows = this.openWindows.filter((win) => win.id !== id);
+      }
+    },
+    restoreWindow(id) {
+      const minimizedWindow = this.minimizedWindows.find((win) => win.id === id);
+      if (minimizedWindow) {
+        minimizedWindow.isMinimized = false;
+        this.openWindows.push(minimizedWindow);
+        this.minimizedWindows = this.minimizedWindows.filter((win) => win.id !== id);
+      }
+      this.setActiveWindow(id);
+    },
+    updateWindowPosition(id, position) {
+      const window = this.openWindows.find((win) => win.id === id);
+      if (window) {
+        window.position = position;
+      }
+    },
+    setActiveWindow(id) {
+      this.activeWindowId = id;
+    },
+    toggleStartMenu() {
+      this.isStartMenuOpen = !this.isStartMenuOpen;
+    },
+    getWindowTitle(id) {
+      const icon = this.icons.find((icon) => icon.id === id);
+      return icon ? icon.name : "Untitled";
+    },
   },
 };
 </script>
 
 <style scoped>
 .desktop {
-  background-color: #008080;
+  width: 100vw;
   height: 100vh;
-  display: flex;
-  flex-direction: column;
+  background-color: #008080;
   position: relative;
-}
-.desktop-icons {
-  flex: 1;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
-  padding: 20px;
+  overflow: hidden;
 }
 </style>

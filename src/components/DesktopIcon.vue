@@ -1,19 +1,19 @@
 <template>
-  <div class="desktop-icon" @dblclick="openWindow">
+  <div class="desktop-icon" @click="openWindow">
     <img :src="icon.image" alt="Icon" />
-    <p>{{ icon.name }}</p>
+    <span>{{ icon.name }}</span>
   </div>
 </template>
 
 <script>
 export default {
-  name: 'DesktopIcon',
+  name: "DesktopIcon",
   props: {
     icon: Object,
   },
   methods: {
     openWindow() {
-      this.$emit('openWindow', this.icon.id);
+      this.$emit("openWindow", this.icon.id);
     },
   },
 };
@@ -21,17 +21,20 @@ export default {
 
 <style scoped>
 .desktop-icon {
-  display: inline-block;
+  width: 100px;
   text-align: center;
   margin: 10px;
   cursor: pointer;
 }
-img {
-  width: 48px;
-  height: 48px;
+
+.desktop-icon img {
+  width: 50px;
+  height: 50px;
 }
-p {
-  margin: 5px 0 0;
+
+.desktop-icon span {
+  display: block;
   font-size: 12px;
+  margin-top: 5px;
 }
 </style>

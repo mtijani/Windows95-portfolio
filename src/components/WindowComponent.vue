@@ -1,25 +1,63 @@
 <template>
-  <div v-if="!window.isMinimized" class="window" :class="{ active: isActive }">
+  <div
+    v-if="!window.isMinimized"
+    class="window"
+    :class="{ active: isActive }"
+    :style="{ top: `${window.position.top}px`, left: `${window.position.left}px` }"
+    @mousedown="startDrag"
+    @mouseup="stopDrag"
+    @mousemove="dragWindow"
+  >
     <div class="window-header">
       <span>{{ window.title }}</span>
-      <button class="close-btn" @click="$emit('closeWindow', window.id)">X</button>
+      <div class="window-controls">
+        <button class="minimize-btn" @click="minimizeWindow">_</button>
+        <button class="close-btn" @click="closeWindow">X</button>
+      </div>
     </div>
     <div class="window-body">
-      <!-- Content of the window -->
       <p>Window Content Goes Here</p>
-    </div>
-    <div class="window-footer">
-      <button @click="$emit('minimizeWindow', window.id)">_</button>
     </div>
   </div>
 </template>
 
 <script>
 export default {
-  name: 'WindowComponent',
+  name: "WindowComponent",
   props: {
     window: Object,
     isActive: Boolean,
+  },
+  data() {
+    return {
+      isDragging: false,
+      offsetX: 0,
+      offsetY: 0,
+    };
+  },
+  methods: {
+    closeWindow() {
+      this.$emit("closeWindow", this.window.id);
+    },
+    minimizeWindow() {
+      this.$emit("minimizeWindow", this.window.id);
+    },
+    startDrag(event) {
+      this.isDragging = true;
+      this.offsetX = event.clientX - this.window.position.left;
+      this.offsetY = event.clientY - this.window.position.top;
+    },
+    stopDrag() {
+      this.isDragging = false;
+    },
+    dragWindow(event) {
+      if (this.isDragging) {
+        this.$emit("dragWindow", this.window.id, {
+          top: event.clientY - this.offsetY,
+          left: event.clientX - this.offsetX,
+        });
+      }
+    },
   },
 };
 </script>
@@ -29,16 +67,9 @@ export default {
   position: absolute;
   width: 300px;
   height: 200px;
-  background-color: white;
-  border: 2px solid #000;
+  background: #c0c0c0;
+  border: 2px solid black;
   box-sizing: border-box;
-  top: 50px;
-  left: 50px;
-  z-index: 100;
-}
-
-.window.active {
-  border-color: #0078d7;
 }
 
 .window-header {
@@ -48,31 +79,15 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  cursor: move;
 }
 
-.window-header span {
-  font-size: 14px;
+.window-controls {
+  display: flex;
+  gap: 5px;
 }
 
 .window-body {
   padding: 10px;
-}
-
-.window-footer {
-  background: #e0e0e0;
-  padding: 5px;
-  text-align: right;
-}
-
-button {
-  background: none;
-  border: none;
-  color: #0078d7;
-  font-size: 14px;
-  cursor: pointer;
-}
-
-button:hover {
-  text-decoration: underline;
 }
 </style>
