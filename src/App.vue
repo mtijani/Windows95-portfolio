@@ -26,6 +26,7 @@
       :activeWindowId="activeWindowId"
       @restoreWindow="restoreWindow"
       @toggleStartMenu="toggleStartMenu"
+      @closeWindow="closeWindow" 
     />
     
     <!-- Start Menu -->
@@ -81,7 +82,11 @@ export default {
       this.isStartMenuOpen = false;
     },
     closeWindow(id) {
+      // Close the window and remove it from openWindows
       this.openWindows = this.openWindows.filter((win) => win.id !== id);
+      this.minimizedWindows = this.minimizedWindows.filter((win) => win.id !== id);
+
+      // If there are still open windows, set the active window to the last one
       this.activeWindowId = this.openWindows.length
         ? this.openWindows[this.openWindows.length - 1].id
         : null;

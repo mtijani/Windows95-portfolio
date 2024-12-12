@@ -1,10 +1,9 @@
 <template>
-  <div class="taskbar">
+  <div class="taskbar" ref="taskbar">
     <div class="start-button" @click="toggleStartMenu">
-  <img :src="require('@/assets/win95.png')" alt="Start" />
-  Start
-</div>
-
+      <img :src="require('@/assets/win95.png')" alt="Start" />
+      Start
+    </div>
 
     <div v-if="isStartMenuOpen" class="start-menu">
       <div class="social-media-links">
@@ -20,10 +19,12 @@
         v-for="window in windows"
         :key="window.id"
         class="taskbar-window"
-        :class="{ active: window.isActive }"
-        @click="toggleWindow(window.id)"
+        :class="{ active: activeWindowId === window.id }"
       >
-        {{ window.title }}
+        <span @click="toggleWindow(window)" class="window-title">
+          {{ window.title }}
+        </span>
+        <button @click="closeWindow(window.id)" class="close-button">X</button>
       </div>
     </div>
 
@@ -38,23 +39,23 @@ export default {
   name: "TaskbarComponent",
   props: {
     windows: Array,
+    activeWindowId: Number,
   },
   data() {
     return {
       isStartMenuOpen: false,
       socialMediaItems: [
-  {
-    name: "Linkedin",
-    url: "https://facebook.com",
-    icon: require('@/assets/SocialMediaIcons/Linkedin.webp'),
-  },
-  {
-    name: "Github",
-    url: "https://twitter.com",
-    icon: require('@/assets/SocialMediaIcons/Github.webp'),
-  }
-],
-
+        {
+          name: "Linkedin",
+          url: "https://facebook.com",
+          icon: require('@/assets/SocialMediaIcons/Linkedin.webp'),
+        },
+        {
+          name: "Github",
+          url: "https://twitter.com",
+          icon: require('@/assets/SocialMediaIcons/Github.webp'),
+        },
+      ],
       currentTime: this.getCurrentTime(),
     };
   },
@@ -62,24 +63,40 @@ export default {
     toggleStartMenu() {
       this.isStartMenuOpen = !this.isStartMenuOpen;
     },
-    toggleWindow(id) {
-      this.$emit("toggleWindow", id);
+    toggleWindow(window) {
+      if (window.isMinimized) {
+        this.$emit("restoreWindow", window.id);
+      } else {
+        this.$emit("toggleWindow", window.id);
+      }
+    },
+    closeWindow(windowId) {
+      this.$emit("closeWindow", windowId);
     },
     getCurrentTime() {
       const now = new Date();
       return now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    },
+    handleClickOutside(event) {
+      const taskbar = this.$refs.taskbar;
+      if (taskbar && !taskbar.contains(event.target)) {
+        this.isStartMenuOpen = false;
+      }
     },
   },
   mounted() {
     this.timeInterval = setInterval(() => {
       this.currentTime = this.getCurrentTime();
     }, 1000);
+    document.addEventListener("click", this.handleClickOutside);
   },
   beforeUnmount() {
     clearInterval(this.timeInterval);
+    document.removeEventListener("click", this.handleClickOutside);
   },
 };
 </script>
+
 
 <style scoped>
 .taskbar {
@@ -94,6 +111,33 @@ export default {
   align-items: center;
   padding: 0 10px;
   z-index: 1000;
+}
+.taskbar-window {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 5px;
+  margin-right: 10px;
+  background: #d3d3d3;
+  border-radius: 5px;
+  cursor: pointer;
+}
+.taskbar-window.active {
+  background: #c3c3c3;
+}
+.window-title {
+  flex-grow: 1;
+  margin-right: 5px;
+}
+.close-button {
+  background: transparent;
+  border: none;
+  color: red;
+  font-weight: bold;
+  cursor: pointer;
+}
+.close-button:hover {
+  color: darkred;
 }
 
 .start-button {
