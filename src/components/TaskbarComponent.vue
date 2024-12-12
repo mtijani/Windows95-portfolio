@@ -1,3 +1,4 @@
+<!-- TaskBar Component -->
 <template>
   <div class="taskbar" ref="taskbar">
     <div class="start-button" @click="toggleStartMenu">
