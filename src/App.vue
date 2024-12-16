@@ -1,13 +1,18 @@
 <template>
   <div class="desktop">
     <!-- Desktop Icons -->
-    <DesktopIcon
-      v-for="icon in icons"
-      :key="icon.id"
-      :icon="icon"
-      @openWindow="openWindow"
-    />
-    
+    <div class="desktop-icons">
+      <div
+        v-for="icon in desktopIcons"
+        :key="icon.id"
+        class="desktop-icon"
+        @click="openWindow(icon.id)"
+      >
+        <img :src="icon.icon" alt="icon" />
+        <span>{{ icon.title }}</span>
+      </div>
+    </div>
+
     <!-- Windows -->
     <WindowComponent
       v-for="window in openWindows"
@@ -16,19 +21,20 @@
       :isActive="activeWindowId === window.id"
       @closeWindow="closeWindow"
       @minimizeWindow="minimizeWindow"
-      @dragWindow="updateWindowPosition"
+      @maximizeWindow="maximizeWindow"
+      @updateWindowPosition="updateWindowPosition"
       @mousedown="setActiveWindow(window.id)"
     />
-    
+
     <!-- Taskbar -->
     <TaskbarComponent
       :windows="minimizedWindows.concat(openWindows)"
       :activeWindowId="activeWindowId"
       @restoreWindow="restoreWindow"
       @toggleStartMenu="toggleStartMenu"
-      @closeWindow="closeWindow" 
+      @closeWindow="closeWindow"
     />
-    
+
     <!-- Start Menu -->
     <StartMenu
       v-if="isStartMenuOpen"
@@ -40,7 +46,6 @@
 </template>
 
 <script>
-import DesktopIcon from "./components/DesktopIcon.vue";
 import WindowComponent from "./components/WindowComponent.vue";
 import TaskbarComponent from "./components/TaskbarComponent.vue";
 import StartMenu from "./components/StartMenuComponent.vue";
@@ -48,16 +53,15 @@ import StartMenu from "./components/StartMenuComponent.vue";
 export default {
   name: "App",
   components: {
-    DesktopIcon,
     WindowComponent,
     TaskbarComponent,
     StartMenu,
   },
   data() {
     return {
-      icons: [
-        { id: 1, name: "My Computer", image: require("@/assets/bio.png") },
-        { id: 2, name: "Recycle Bin", image: require("@/assets/file.png") },
+      desktopIcons: [
+        { id: 1, title: "My Computer", icon: require("@/assets/bio.png") },
+        { id: 2, title: "Recycle Bin", icon: require("@/assets/file.png") },
       ],
       openWindows: [],
       minimizedWindows: [],
@@ -67,26 +71,24 @@ export default {
   },
   methods: {
     openWindow(id) {
-      const existingWindow = this.openWindows.find((win) => win.id === id);
-
-      if (!existingWindow) {
-        this.openWindows.push({
-          id,
-          title: this.getWindowTitle(id),
-          isMinimized: false,
-          position: { top: 100, left: 100 },
-        });
-      }
-
-      this.setActiveWindow(id);
-      this.isStartMenuOpen = false;
-    },
+  const existingWindow = this.openWindows.find((win) => win.id === id);
+  if (!existingWindow) {
+    this.openWindows.push({
+      id: Date.now(), // Use a unique identifier (e.g., timestamp or UUID)
+      title: this.getWindowTitle(id),
+      isMinimized: false,
+      isMaximized: false,
+      position: { top: 100, left: 100 },
+      size: { width: 400, height: 300 },
+    });
+  }
+  this.setActiveWindow(id);
+  this.isStartMenuOpen = false;
+},
     closeWindow(id) {
-      // Close the window and remove it from openWindows
+      // Close only the specific window that matches the id
       this.openWindows = this.openWindows.filter((win) => win.id !== id);
       this.minimizedWindows = this.minimizedWindows.filter((win) => win.id !== id);
-
-      // If there are still open windows, set the active window to the last one
       this.activeWindowId = this.openWindows.length
         ? this.openWindows[this.openWindows.length - 1].id
         : null;
@@ -97,6 +99,18 @@ export default {
         window.isMinimized = true;
         this.minimizedWindows.push(window);
         this.openWindows = this.openWindows.filter((win) => win.id !== id);
+      }
+    },
+    maximizeWindow(id) {
+      const window = this.openWindows.find((win) => win.id === id);
+      if (window) {
+        window.isMaximized = !window.isMaximized;
+        if (window.isMaximized) {
+          window.position = { top: 0, left: 0 };
+          window.size = { width: window.innerWidth, height: window.innerHeight };
+        } else {
+          window.size = { width: 400, height: 300 };
+        }
       }
     },
     restoreWindow(id) {
@@ -110,7 +124,7 @@ export default {
     },
     updateWindowPosition(id, position) {
       const window = this.openWindows.find((win) => win.id === id);
-      if (window) {
+      if (window && !window.isMaximized) {
         window.position = position;
       }
     },
@@ -121,8 +135,8 @@ export default {
       this.isStartMenuOpen = !this.isStartMenuOpen;
     },
     getWindowTitle(id) {
-      const icon = this.icons.find((icon) => icon.id === id);
-      return icon ? icon.name : "Untitled";
+      const icon = this.desktopIcons.find((icon) => icon.id === id);
+      return icon ? icon.title : "Untitled";
     },
   },
 };
@@ -135,5 +149,31 @@ export default {
   background-color: #008080;
   position: relative;
   overflow: hidden;
+}
+
+.desktop-icons {
+  display: flex;
+  flex-wrap: wrap;
+  position: absolute;
+  top: 10px;
+  left: 10px;
+}
+
+.desktop-icon {
+  width: 80px;
+  text-align: center;
+  margin: 10px;
+  cursor: pointer;
+}
+
+.desktop-icon img {
+  width: 50px;
+  height: 50px;
+}
+
+.desktop-icon span {
+  display: block;
+  font-size: 12px;
+  margin-top: 5px;
 }
 </style>

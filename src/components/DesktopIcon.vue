@@ -1,23 +1,29 @@
 <template>
-  <div class="desktop-icon" @click="openWindow">
-    <img :src="icon.image" alt="Icon" />
-    <span>{{ icon.name }}</span>
+  <div @click="openWindow">
+    <img :src="iconSrc" alt="Desktop Icon" />
   </div>
 </template>
 
 <script>
 export default {
-  name: "DesktopIcon",
   props: {
-    icon: Object,
+    iconSrc: String,
+    windowTitle: String
   },
   methods: {
     openWindow() {
-      this.$emit("openWindow", this.icon.id);
-    },
-  },
+      // Generate a unique ID for each window instance
+      const uniqueWindowId = `${this.windowTitle}-${Date.now()}`;
+
+      this.$emit('open-window', {
+        id: uniqueWindowId,
+        title: this.windowTitle
+      });
+    }
+  }
 };
 </script>
+
 
 <style scoped>
 .desktop-icon {
