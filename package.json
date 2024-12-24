@@ -13,6 +13,7 @@
     "core-js": "^3.8.3",
     "pinia": "^2.3.0",
     "vue": "^3.2.13",
+    "vue-pdf": "^4.3.0",
     "vue-router": "^4.5.0"
   },
   "devDependencies": {
@@ -24,9 +25,12 @@
     "autoprefixer": "^10.4.20",
     "eslint": "^7.32.0",
     "eslint-plugin-vue": "^8.0.3",
+    "file-loader": "^6.2.0",
+    "pdfjs-dist": "^4.9.155",
     "postcss": "^8.4.49",
     "tailwindcss": "^3.4.16",
-    "vue-cli-plugin-vuetify": "~2.5.8"
+    "vue-cli-plugin-vuetify": "~2.5.8",
+    "worker-loader": "^3.0.8"
   },
   "eslintConfig": {
     "root": true,

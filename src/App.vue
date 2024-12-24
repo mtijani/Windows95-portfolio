@@ -62,6 +62,7 @@ export default {
       desktopIcons: [
         { id: 1, title: "My Computer", icon: require("@/assets/bio.png") },
         { id: 2, title: "Recycle Bin", icon: require("@/assets/file.png") },
+        { id: 3, title: "My CV", icon: require("@/assets/photos.png") }, // New Icon for CV
       ],
       openWindows: [],
       minimizedWindows: [],
@@ -71,24 +72,31 @@ export default {
   },
   methods: {
     openWindow(id) {
-  const existingWindow = this.openWindows.find((win) => win.id === id);
-  if (!existingWindow) {
-    this.openWindows.push({
-      id: Date.now(), // Use a unique identifier (e.g., timestamp or UUID)
-      title: this.getWindowTitle(id),
-      isMinimized: false,
-      isMaximized: false,
-      position: { top: 100, left: 100 },
-      size: { width: 400, height: 300 },
-    });
-  }
-  this.setActiveWindow(id);
-  this.isStartMenuOpen = false;
-},
+      const existingWindow = this.openWindows.find((win) => win.id === id);
+      if (!existingWindow) {
+        const content =
+          id === 3
+            ? { type: "pdf", url: "/cv.pdf" } // If "My CV" is clicked
+            : { type: "text", content: `Content of ${this.getWindowTitle(id)}` };
+
+        this.openWindows.push({
+          id,
+          title: this.getWindowTitle(id),
+          isMinimized: false,
+          isMaximized: false,
+          position: { top: 100, left: 100 },
+          size: { width: 400, height: 300 },
+          content,
+        });
+      }
+      this.setActiveWindow(id);
+      this.isStartMenuOpen = false;
+    },
     closeWindow(id) {
-      // Close only the specific window that matches the id
       this.openWindows = this.openWindows.filter((win) => win.id !== id);
-      this.minimizedWindows = this.minimizedWindows.filter((win) => win.id !== id);
+      this.minimizedWindows = this.minimizedWindows.filter(
+        (win) => win.id !== id
+      );
       this.activeWindowId = this.openWindows.length
         ? this.openWindows[this.openWindows.length - 1].id
         : null;
@@ -114,11 +122,15 @@ export default {
       }
     },
     restoreWindow(id) {
-      const minimizedWindow = this.minimizedWindows.find((win) => win.id === id);
+      const minimizedWindow = this.minimizedWindows.find(
+        (win) => win.id === id
+      );
       if (minimizedWindow) {
         minimizedWindow.isMinimized = false;
         this.openWindows.push(minimizedWindow);
-        this.minimizedWindows = this.minimizedWindows.filter((win) => win.id !== id);
+        this.minimizedWindows = this.minimizedWindows.filter(
+          (win) => win.id !== id
+        );
       }
       this.setActiveWindow(id);
     },
