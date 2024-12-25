@@ -24,7 +24,15 @@
       @maximizeWindow="maximizeWindow"
       @updateWindowPosition="updateWindowPosition"
       @mousedown="setActiveWindow(window.id)"
-    />
+    >
+      <template v-slot:custom-content>
+        <!-- Win95PFE integration -->
+        <Win95PFE
+          v-if="window.id === 4"
+          @closeWindow="closeWindow(window.id)"
+        />
+      </template>
+    </WindowComponent>
 
     <!-- Taskbar -->
     <TaskbarComponent
@@ -49,6 +57,7 @@
 import WindowComponent from "./components/WindowComponent.vue";
 import TaskbarComponent from "./components/TaskbarComponent.vue";
 import StartMenu from "./components/StartMenuComponent.vue";
+import Win95PFE from "./components/Win95PFE.vue";
 
 export default {
   name: "App",
@@ -56,13 +65,15 @@ export default {
     WindowComponent,
     TaskbarComponent,
     StartMenu,
+    Win95PFE,
   },
   data() {
     return {
       desktopIcons: [
         { id: 1, title: "My Computer", icon: require("@/assets/bio.png") },
         { id: 2, title: "Recycle Bin", icon: require("@/assets/file.png") },
-        { id: 3, title: "My CV", icon: require("@/assets/photos.png") }, // New Icon for CV
+        { id: 3, title: "My CV", icon: require("@/assets/photos.png") },
+        { id: 4, title: "PFE Info", icon: require("@/assets/folder.png") }, // New icon for Win95PFE
       ],
       openWindows: [],
       minimizedWindows: [],
@@ -76,7 +87,9 @@ export default {
       if (!existingWindow) {
         const content =
           id === 3
-            ? { type: "pdf", url: "/cv.pdf" } // If "My CV" is clicked
+            ? { type: "pdf", url: "/cv.pdf" }
+            : id === 4
+            ? { type: "custom", component: "Win95PFE" } // Win95PFE window
             : { type: "text", content: `Content of ${this.getWindowTitle(id)}` };
 
         this.openWindows.push({

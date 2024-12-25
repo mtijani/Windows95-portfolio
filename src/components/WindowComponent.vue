@@ -2,100 +2,103 @@
   <div
     class="window"
     :style="{
-      top: window.isCV ? '0px' : window.position.top + 'px',
-      left: window.isCV ? '0px' : window.position.left + 'px',
-      width: window.isCV || window.isMaximized ? '100vw' : window.size.width + 'px',
-      height: window.isCV || window.isMaximized ? '100vh' : window.size.height + 'px',
+      top: window.position.top + 'px',
+      left: window.position.left + 'px',
+      width: window.isMaximized ? '100%' : window.size.width + 'px',
+      height: window.isMaximized ? '100%' : window.size.height + 'px',
     }"
-    :class="{ active: isActive, minimized: window.isMinimized }"
-    @mousedown="startDrag($event)"
+    :class="{ active: isActive, minimized: window.isMinimized, maximized: window.isMaximized }"
+    @mousedown="startDrag"
   >
-    <!-- Window header for non-CV windows -->
-    <div class="window-header" v-if="!window.isCV">
+    <!-- Window Header -->
+    <div class="window-header" @dblclick="toggleMaximize">
       <span>{{ window.title }}</span>
       <div class="window-buttons">
-        <button @click="minimize">_</button>
-        <button @click="maximize">{{ window.isMaximized ? '⧉' : '□' }}</button>
-        <button @click="close">X</button>
+        <button class="minimize-btn" @click.stop="minimize">_</button>
+        <button class="maximize-btn" @click.stop="toggleMaximize">
+          {{ window.isMaximized ? '⧉' : '□' }}
+        </button>
+        <button class="close-btn" @click.stop="close">X</button>
       </div>
     </div>
 
-    <!-- Window content -->
+    <!-- Window Content -->
     <div class="window-content">
-      <!-- Text content -->
+      <!-- Custom Content Slot -->
+      <slot name="custom-content"></slot>
+
+      <!-- Default Content Types -->
       <div v-if="window.content.type === 'text'">
         {{ window.content.content }}
       </div>
 
-      <!-- PDF content -->
       <iframe
-        v-if="window.content.type === 'pdf'"
+        v-else-if="window.content.type === 'pdf'"
         :src="window.content.url"
         frameborder="0"
-        :style="{
-          width: '100%',
-          height: '100%',
-          border: 'none',
-          position: 'absolute',
-          top: '0',
-          left: '0',
-        }"
+        style="width: 100%; height: 100%; border: none;"
       ></iframe>
+
+      <!-- Win95PFE content -->
+      <Win95PFE
+        v-else-if="window.content.type === 'Win95PFE'"
+        :someProp="window.content.props.someProp"
+      />
     </div>
   </div>
 </template>
 
 <script>
+import Win95PFE from "@/components/Win95PFE.vue";  // Make sure to import the component
+
 export default {
   name: "WindowComponent",
-  props: {
-    window: Object,
-    isActive: Boolean,
+  components: {
+    Win95PFE, // Register the component here
   },
-  data() {
-    return {
-      isDragging: false,
-      offsetX: 0,
-      offsetY: 0,
-      screenWidth: window.innerWidth,
-      screenHeight: window.innerHeight,
-    };
+  props: {
+    window: {
+      type: Object,
+      required: true,
+    },
+    isActive: {
+      type: Boolean,
+      default: false,
+    },
   },
   methods: {
-    minimize() {
-      this.$emit("minimizeWindow", this.window.id);
-    },
-    maximize() {
-      this.$emit("maximizeWindow", this.window.id);
-    },
     close() {
       this.$emit("closeWindow", this.window.id);
     },
+    minimize() {
+      this.$emit("minimizeWindow", this.window.id);
+    },
+    toggleMaximize() {
+      this.$emit("maximizeWindow", this.window.id);
+    },
     startDrag(event) {
-      if (event.target.closest(".window-header") && !this.window.isCV) {
-        this.isDragging = true;
-        this.offsetX = event.clientX - this.window.position.left;
-        this.offsetY = event.clientY - this.window.position.top;
-        window.addEventListener("mousemove", this.onDrag);
-        window.addEventListener("mouseup", this.stopDrag);
-      }
-    },
-    onDrag(event) {
-      if (this.isDragging) {
-        let newLeft = event.clientX - this.offsetX;
-        let newTop = event.clientY - this.offsetY;
+      if (this.window.isMaximized) return;
 
-        // Keep window within bounds
-        newLeft = Math.max(0, Math.min(this.screenWidth - this.window.size.width, newLeft));
-        newTop = Math.max(0, Math.min(this.screenHeight - this.window.size.height, newTop));
+      const initialMouseX = event.clientX;
+      const initialMouseY = event.clientY;
+      const { top, left } = this.window.position;
 
-        this.$emit("updateWindowPosition", this.window.id, { top: newTop, left: newLeft });
-      }
-    },
-    stopDrag() {
-      this.isDragging = false;
-      window.removeEventListener("mousemove", this.onDrag);
-      window.removeEventListener("mouseup", this.stopDrag);
+      const onMouseMove = (e) => {
+        const deltaX = e.clientX - initialMouseX;
+        const deltaY = e.clientY - initialMouseY;
+        this.$emit("updateWindowPosition", this.window.id, {
+          top: top + deltaY,
+          left: left + deltaX,
+        });
+      };
+
+      const onMouseUp = () => {
+        window.removeEventListener("mousemove", onMouseMove);
+        window.removeEventListener("mouseup", onMouseUp);
+      };
+
+      window.addEventListener("mousemove", onMouseMove);
+      window.addEventListener("mouseup", onMouseUp);
     },
   },
 };
@@ -108,6 +111,8 @@ export default {
   border: 1px solid #ccc;
   z-index: 1;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  font-family: "MS Sans Serif", sans-serif;
+  overflow: hidden; /* Prevent content overflow */
 }
 
 .window-header {
@@ -117,6 +122,7 @@ export default {
   display: flex;
   justify-content: space-between;
   cursor: grab;
+  font-size: 14px;
 }
 
 .window-header:active {
@@ -131,21 +137,40 @@ export default {
 }
 
 .window-content {
-  position: relative; /* Ensures child iframe is positioned relative to this container */
   width: 100%;
   height: 100%;
-  overflow: hidden; /* Prevents overflow of the iframe */
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background-color: #c0c0c0; /* Matches the Win95 theme */
+}
+
+.window-content.maximized {
+  font-size: 18px; /* Bigger font when maximized */
+}
+
+.window-content.minimized {
+  display: none;
 }
 
 .active {
   border: 2px solid #1e90ff;
 }
 
-.minimized {
-  display: none;
+/* Custom Scrollbar */
+.window-content::-webkit-scrollbar {
+  width: 8px;
 }
 
-/* Full-screen iframe styles */
+.window-content::-webkit-scrollbar-thumb {
+  background-color: #888;
+  border-radius: 4px;
+}
+
+.window-content::-webkit-scrollbar-track {
+  background-color: #e0e0e0;
+}
+
 iframe {
   width: 100%;
   height: 100%;
@@ -155,4 +180,3 @@ iframe {
   left: 0;
 }
 </style>
-
