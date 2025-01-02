@@ -14,11 +14,9 @@
     <div class="window-header" @dblclick="toggleMaximize">
       <span>{{ window.title }}</span>
       <div class="window-buttons">
-        <button class="minimize-btn" @click.stop="minimize">_</button>
-        <button class="maximize-btn" @click.stop="toggleMaximize">
-          {{ window.isMaximized ? '⧉' : '□' }}
-        </button>
-        <button class="close-btn" @click.stop="close">X</button>
+        <button class="minimize-btn" @click.stop="minimize"></button>
+        <button class="maximize-btn" @click.stop="toggleMaximize"></button>
+        <button class="close-btn" @click.stop="close"></button>
       </div>
     </div>
 
@@ -40,21 +38,29 @@
       ></iframe>
 
       <!-- Win95PFE content -->
+       <Win95Internship2021  v-else-if="window.content.type === 'Win95Internship2021'"
+       :someProp="window.content.props.someProp" />
       <Win95PFE
         v-else-if="window.content.type === 'Win95PFE'"
         :someProp="window.content.props.someProp"
       />
+      <win95Internship2022
+       v-else-if="window.content.type === 'win95Internship2022'"
+      :someProp="window.content.props.someProp"  />
     </div>
   </div>
 </template>
 
 <script>
-import Win95PFE from "@/components/Win95PFE.vue";  // Make sure to import the component
-
+import Win95PFE from "@/components/Win95PFE.vue"; 
+import win95Internship2022 from "@/components/Win95Internship2022.vue"
+import Win95Internship2021 from "@/components/Win95Internship2021.vue"
 export default {
   name: "WindowComponent",
   components: {
     Win95PFE, // Register the component here
+    win95Internship2022,
+    Win95Internship2021
   },
   props: {
     window: {
@@ -108,41 +114,80 @@ export default {
 .window {
   position: absolute;
   background: white;
-  border: 1px solid #ccc;
   z-index: 1;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   font-family: "MS Sans Serif", sans-serif;
   overflow: hidden; /* Prevent content overflow */
 }
 
+/* Window Header */
 .window-header {
-  background-color: #444;
+  background-color: #000080; /* Dark blue */
   color: white;
-  padding: 10px;
+  padding: 2px 5px;
+  font-family: "MS Sans Serif", sans-serif;
+  font-size: 12px;
+  border: 1px solid #808080; /* Outer border */
   display: flex;
   justify-content: space-between;
   cursor: grab;
-  font-size: 14px;
+  box-shadow: inset -1px -1px #ffffff, inset 1px 1px #000080; /* Beveled effect */
 }
 
 .window-header:active {
   cursor: grabbing;
 }
 
+/* Window Buttons */
 .window-buttons button {
-  background: none;
-  color: white;
-  border: none;
+  width: 20px;
+  height: 20px;
+  background: #d4d0c8; /* Classic gray */
+  border: 1px solid #808080; /* Outer dark border */
+  font-size: 14px;
+  line-height: 20px;
+  text-align: center;
+  padding: 0;
+  margin-left: 2px;
+  color: black; /* Button text color */
+  box-shadow: inset -1px -1px #ffffff, inset 1px 1px #808080; /* Beveled effect */
   cursor: pointer;
 }
 
+.window-buttons button:hover {
+  background: #c0c0c0; /* Slightly darker on hover */
+}
+
+.window-buttons .minimize-btn::before {
+  content: "_";
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.window-buttons .maximize-btn::before {
+  content: "□";
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.window-buttons .close-btn {
+  color: red; /* Red close button text */
+  font-weight: bold;
+}
+
+.window-buttons .close-btn::before {
+  content: "X";
+  font-weight: bold;
+}
+
+/* Window Content */
 .window-content {
+  position: relative;
   width: 100%;
   height: 100%;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  background-color: #c0c0c0; /* Matches the Win95 theme */
+  padding: 10px;
+  overflow: auto; /* Make the content scrollable */
+  font-size: 14px;
+  line-height: 1.5;
 }
 
 .window-content.maximized {
@@ -153,6 +198,7 @@ export default {
   display: none;
 }
 
+/* Active Window Border */
 .active {
   border: 2px solid #1e90ff;
 }

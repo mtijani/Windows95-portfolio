@@ -1,12 +1,14 @@
 <template>
-  <div class="desktop">
+  <div class="desktop" @click="handleClickOutside">
     <!-- Desktop Icons -->
     <div class="desktop-icons">
       <div
         v-for="icon in desktopIcons"
         :key="icon.id"
         class="desktop-icon"
-        @click="openWindow(icon.id)"
+        :class="{ selected: selectedIconId === icon.id }"
+        @click="selectIcon(icon.id, $event)"
+        @dblclick="openWindow(icon.id)"
       >
         <img :src="icon.icon" alt="icon" />
         <span>{{ icon.title }}</span>
@@ -25,13 +27,24 @@
       @updateWindowPosition="updateWindowPosition"
       @mousedown="setActiveWindow(window.id)"
     >
-      <template v-slot:custom-content>
-        <!-- Win95PFE integration -->
-        <Win95PFE
-          v-if="window.id === 4"
-          @closeWindow="closeWindow(window.id)"
-        />
-      </template>
+    <template v-slot:custom-content>
+  <win95Internship2022
+    v-if="window.id === 1"
+    @closeWindow="closeWindow(window.id)"
+  />
+
+  <Win95Internship2021 v-if="window.id === 2"
+  @closeWindow="closeWindow(window.id)" />
+
+  <Win95PFE
+    v-if="window.id === 4"
+    @closeWindow="closeWindow(window.id)"
+  />
+  <Wind95TalendComponent
+  v-if="window.id === 5 && window.title === 'Talend'"
+  @closeWindow="closeWindow(window.id)"
+/>
+</template>
     </WindowComponent>
 
     <!-- Taskbar -->
@@ -53,11 +66,15 @@
   </div>
 </template>
 
+
 <script>
 import WindowComponent from "./components/WindowComponent.vue";
 import TaskbarComponent from "./components/TaskbarComponent.vue";
 import StartMenu from "./components/StartMenuComponent.vue";
 import Win95PFE from "./components/Win95PFE.vue";
+import win95Internship2022 from "@/components/Win95Internship2022.vue"
+import Win95Internship2021 from "@/components/Win95Internship2021.vue"
+import Wind95TalendComponent from '@/components/Win95TalendComponent.vue';
 
 export default {
   name: "App",
@@ -66,32 +83,48 @@ export default {
     TaskbarComponent,
     StartMenu,
     Win95PFE,
+    win95Internship2022,
+    Win95Internship2021,
+    Wind95TalendComponent
   },
   data() {
     return {
       desktopIcons: [
-        { id: 1, title: "My Computer", icon: require("@/assets/bio.png") },
-        { id: 2, title: "Recycle Bin", icon: require("@/assets/file.png") },
-        { id: 3, title: "My CV", icon: require("@/assets/photos.png") },
-        { id: 4, title: "PFE Info", icon: require("@/assets/folder.png") }, // New icon for Win95PFE
+        { id: 1, title: "Internship 2022", icon: require("@/assets/bio.png") },
+        { id: 2, title: "Internship 2021", icon: require("@/assets/file.png") },
+        { id: 3, title: "My CV  (french)", icon: require("@/assets/photos.png") },
+        { id: 4, title: "Final Year Project 2024", icon: require("@/assets/folder.png") }, // New icon for Win95PFE
+        { id: 5,  title:"Talend", icon:require("@/assets/Talend.png")}
+        
       ],
       openWindows: [],
       minimizedWindows: [],
       activeWindowId: null,
+      selectedIconId: null, // Tracks the currently selected icon
       isStartMenuOpen: false,
     };
   },
   methods: {
+    selectIcon(id, event) {
+      // Select the clicked icon and highlight it
+      this.selectedIconId = id;
+      event.stopPropagation(); // Prevent click from propagating to desktop
+    },
     openWindow(id) {
       const existingWindow = this.openWindows.find((win) => win.id === id);
       if (!existingWindow) {
         const content =
-          id === 3
-            ? { type: "pdf", url: "/cv.pdf" }
-            : id === 4
-            ? { type: "custom", component: "Win95PFE" } // Win95PFE window
-            : { type: "text", content: `Content of ${this.getWindowTitle(id)}` };
-
+            id === 1
+              ? { type: "custom", component: "Win95Internship" }
+              : id === 2 
+              ? {type:"custom", component:"Win95Internship2021"}
+              : id === 3
+              ? { type: "pdf", url: "/cv.pdf" }
+              : id === 4
+              ? { type: "custom", component: "Win95PFE" }
+              : id === 5 
+              ? {type:"custom", component:"Win95TalendComponent"}
+              : { type: "text", content: `Content of ${this.getWindowTitle(id)}` };
         this.openWindows.push({
           id,
           title: this.getWindowTitle(id),
@@ -163,10 +196,15 @@ export default {
       const icon = this.desktopIcons.find((icon) => icon.id === id);
       return icon ? icon.title : "Untitled";
     },
+    handleClickOutside(event) {
+      // If the click is outside of the selected icon, deselect the icon
+      if (!event.target.closest('.desktop-icon')) {
+        this.selectedIconId = null;
+      }
+    },
   },
 };
 </script>
-
 <style scoped>
 .desktop {
   width: 100vw;
@@ -176,9 +214,11 @@ export default {
   overflow: hidden;
 }
 
+
 .desktop-icons {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(3, 80px); /* 3 icons per row */
+  gap: 10px; /* Space between the icons */
   position: absolute;
   top: 10px;
   left: 10px;
@@ -201,4 +241,22 @@ export default {
   font-size: 12px;
   margin-top: 5px;
 }
+.desktop-icon:hover {
+  outline: 1px dashed #e9e9f0; /* Windows 95 hover effect */
+  outline-offset: -2px;
+}
+.desktop-icon.selected {
+  background-color: #000080; /* Classic Windows 95 selection color */
+  color: white; /* White text on selection */
+  border: 2px inset white; /* Inner border for a 3D inset effect */
+  box-shadow: 
+    1px 1px 0px #808080, /* Bottom-right shadow */
+    -1px -1px 0px black, /* Top-left shadow */
+    inset 1px 1px 0px black, /* Inner black inset */
+    inset -1px -1px 0px white; /* Inner white inset */
+  border-radius: 0; /* Windows 95 icons had no rounded corners */
+  padding: 2px; /* Adds padding inside the border for better spacing */
+  outline: none; /* Remove any default outline */
+}
+
 </style>
