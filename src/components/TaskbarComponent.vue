@@ -7,7 +7,7 @@
     </div>
 
     <!-- Start Menu - only visible when isStartMenuOpen is true -->
-    <div v-if="isStartMenuOpen" class="start-menu">
+    <div v-if="isStartMenuOpen" key="start-menu-open" class="start-menu">
       <!-- Sidebar Image on the Left -->
       <div class="win95-image">
         <img :src="require('@/assets/sidebar-image.png')" alt="Windows 95" />
@@ -28,18 +28,26 @@
 
         <!-- Social Media Links Section -->
         <div class="social-media-links">
-          <a v-for="item in socialMediaItems" :key="item.name" :href="item.url" target="_blank">
+          <a
+            v-for="item in socialMediaItems"
+            :key="item.name"
+            :href="item.url"
+            target="_blank"
+          >
             <img :src="item.icon" :alt="item.name" />
             {{ item.name }}
           </a>
         </div>
       </div>
     </div>
+    <div v-else key="start-menu-closed">
+      <!-- Placeholder or nothing when Start Menu is closed -->
+    </div>
 
     <!-- Taskbar Windows Section -->
     <div class="taskbar-windows">
       <div
-        v-for="window in windows"
+        v-for="window in displayedWindows"
         :key="window.id"
         class="taskbar-window"
         :class="{ active: activeWindowId === window.id }"
@@ -83,6 +91,12 @@ export default {
       currentTime: this.getCurrentTime(),
     };
   },
+  computed: {
+    displayedWindows() {
+      // Show only the active window if the user is on a phone, otherwise show all.
+      return this.isMobile() ? this.windows.filter(w => w.id === this.activeWindowId) : this.windows;
+    },
+  },
   methods: {
     toggleStartMenu() {
       this.isStartMenuOpen = !this.isStartMenuOpen;
@@ -102,7 +116,7 @@ export default {
       return now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
     },
     openWindow(id) {
-      this.$emit("openWindow", id);  // Open the clicked window
+      this.$emit("openWindow", id); // Open the clicked window
     },
     handleClickOutside(event) {
       const taskbar = this.$refs.taskbar;
@@ -110,16 +124,21 @@ export default {
         this.isStartMenuOpen = false;
       }
     },
+    isMobile() {
+      return window.innerWidth <= 768; // Define a breakpoint for mobile devices
+    },
   },
   mounted() {
     this.timeInterval = setInterval(() => {
       this.currentTime = this.getCurrentTime();
     }, 1000);
     document.addEventListener("click", this.handleClickOutside);
+    window.addEventListener("resize", this.checkMobileView);
   },
   beforeUnmount() {
     clearInterval(this.timeInterval);
     document.removeEventListener("click", this.handleClickOutside);
+    window.removeEventListener("resize", this.checkMobileView);
   },
 };
 </script>
@@ -141,11 +160,10 @@ export default {
 }
 
 .start-button {
-  background: #005a8b; /* Dark blue background */
+  background: #005a8b;
   color: white;
   font-family: "Tahoma", sans-serif;
   font-size: 14px;
-  font-weight: normal;
   padding: 5px 15px;
   border: 1px solid #808080;
   cursor: pointer;
@@ -159,7 +177,7 @@ export default {
 }
 
 .start-button:hover {
-  background: #003d66; /* Darker blue when hovered */
+  background: #003d66;
 }
 
 /* Start Menu styles */
@@ -167,17 +185,17 @@ export default {
   position: absolute;
   bottom: 45px;
   left: 0;
-  background: #c0c0c0; /* Light grey background */
-  border: 2px solid #808080; /* Darker grey border */
+  background: #c0c0c0;
+  border: 2px solid #808080;
   padding: 10px;
-  width: 300px; /* Increased width for better layout */
-  box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.2); /* Subtle shadow for 3D effect */
+  width: 300px;
+  box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.2);
   display: flex;
 }
 
 .win95-image {
-  width: 80px; /* Adjust the size of the image */
-  margin-right: 10px; /* Space between the image and the content */
+  width: 80px;
+  margin-right: 10px;
 }
 
 .start-menu-content {
@@ -229,13 +247,13 @@ export default {
   display: flex;
   gap: 5px;
   flex-grow: 1;
-  padding-left: 5px; /* Add some padding on the left */
+  padding-left: 5px;
 }
 
 .taskbar-window {
   background: #c0c0c0;
   border: 2px solid #808080;
-  padding: 3px 8px; /* Reduced padding for a thinner window */
+  padding: 3px 8px;
   cursor: pointer;
   white-space: nowrap;
   overflow: hidden;
@@ -243,11 +261,11 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-radius: 2px; /* Slight rounded corners for the windows */
-  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3); /* 3D effect */
-  min-width: 80px; /* Thinner minimum width */
-  height: 24px; /* Reduced height to make it thinner */
-  font-size: 12px; /* Smaller font size to fit text better */
+  border-radius: 2px;
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+  min-width: 80px;
+  height: 24px;
+  font-size: 12px;
 }
 
 .taskbar-window.active {
@@ -267,20 +285,21 @@ export default {
   padding: 5px 10px;
   font-weight: bold;
 }
+
 .close-button {
   background: transparent;
   color: black;
   font-weight: bold;
   border: none;
   cursor: pointer;
-  font-size: 14px; /* Adjusted font size for better fit */
+  font-size: 14px;
   padding: 0;
   margin-left: 5px;
-  width: 16px; /* Smaller close button */
-  height: 16px; /* Adjusted to match new size */
+  width: 16px;
+  height: 16px;
   text-align: center;
-  line-height: 12px; /* Smaller line height to fit the button */
-  border-radius: 50%; /* Rounded close button */
+  line-height: 12px;
+  border-radius: 50%;
   transition: background-color 0.2s ease;
 }
 
@@ -293,4 +312,3 @@ export default {
   background-color: #ff0000;
 }
 </style>
-

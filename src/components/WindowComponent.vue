@@ -8,12 +8,16 @@
       height: window.isMaximized ? '100%' : window.size.height + 'px',
     }"
     :class="{ active: isActive, minimized: window.isMinimized, maximized: window.isMaximized }"
-    @mousedown="startDrag"
-    @touchstart="startDrag" 
+
 
   >
     <!-- Window Header -->
-    <div class="window-header" @dblclick="toggleMaximize">
+    <div class="window-header"
+    
+    @dblclick="toggleMaximize"
+    @mousedown="startDrag"
+    @touchstart="startDrag" 
+    >
       <span>{{ window.title }}</span>
       <div class="window-buttons">
         <button class="minimize-btn" @click.stop="minimize"></button>
