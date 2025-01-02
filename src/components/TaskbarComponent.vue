@@ -71,12 +71,12 @@ export default {
       socialMediaItems: [
         {
           name: "Linkedin",
-          url: "https://linkedin.com",
+          url: "https://www.linkedin.com/in/mohamed-tijani-khammouma/",
           icon: require('@/assets/SocialMediaIcons/Linkedin.webp'),
         },
         {
           name: "Github",
-          url: "https://github.com",
+          url: "https://github.com/mtijani/",
           icon: require('@/assets/SocialMediaIcons/Github.webp'),
         },
       ],

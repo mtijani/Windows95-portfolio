@@ -9,6 +9,8 @@
     }"
     :class="{ active: isActive, minimized: window.isMinimized, maximized: window.isMaximized }"
     @mousedown="startDrag"
+    @touchstart="startDrag" 
+
   >
     <!-- Window Header -->
     <div class="window-header" @dblclick="toggleMaximize">
@@ -83,30 +85,36 @@ export default {
       this.$emit("maximizeWindow", this.window.id);
     },
     startDrag(event) {
-      if (this.window.isMaximized) return;
+    if (this.window.isMaximized) return;
 
-      const initialMouseX = event.clientX;
-      const initialMouseY = event.clientY;
-      const { top, left } = this.window.position;
+    const isTouch = event.type === "touchstart";
+    const initialMouseX = isTouch ? event.touches[0].clientX : event.clientX;
+    const initialMouseY = isTouch ? event.touches[0].clientY : event.clientY;
+    const { top, left } = this.window.position;
 
-      const onMouseMove = (e) => {
-        const deltaX = e.clientX - initialMouseX;
-        const deltaY = e.clientY - initialMouseY;
-        this.$emit("updateWindowPosition", this.window.id, {
-          top: top + deltaY,
-          left: left + deltaX,
-        });
-      };
+    const onMove = (e) => {
+      const currentX = isTouch ? e.touches[0].clientX : e.clientX;
+      const currentY = isTouch ? e.touches[0].clientY : e.clientY;
+      const deltaX = currentX - initialMouseX;
+      const deltaY = currentY - initialMouseY;
 
-      const onMouseUp = () => {
-        window.removeEventListener("mousemove", onMouseMove);
-        window.removeEventListener("mouseup", onMouseUp);
-      };
+      // Emit updated position
+      this.$emit("updateWindowPosition", this.window.id, {
+        top: top + deltaY,
+        left: left + deltaX,
+      });
+    };
 
-      window.addEventListener("mousemove", onMouseMove);
-      window.addEventListener("mouseup", onMouseUp);
-    },
+    const onEnd = () => {
+      window.removeEventListener(isTouch ? "touchmove" : "mousemove", onMove);
+      window.removeEventListener(isTouch ? "touchend" : "mouseup", onEnd);
+    };
+
+    window.addEventListener(isTouch ? "touchmove" : "mousemove", onMove);
+    window.addEventListener(isTouch ? "touchend" : "mouseup", onEnd);
   },
+},
+
 };
 </script>
 
@@ -224,5 +232,17 @@ iframe {
   position: absolute;
   top: 0;
   left: 0;
+}
+
+
+.window.minimized .window-content {
+  display: none; /* Hide content */
+}
+
+.window.minimized .window-header {
+  cursor: grab;
+  height: 30px; /* Adjust height for minimized state */
+  padding: 5px;
+  font-size: 12px;
 }
 </style>
