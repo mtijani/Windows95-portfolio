@@ -1,6 +1,7 @@
 const { defineConfig } = require('@vue/cli-service');
 
 module.exports = defineConfig({
+  publicPath: process.env.NODE_ENV === 'production' ? '/<mtijani>/' : '/',
   transpileDependencies: true,
   chainWebpack: config => {
     // Handle pdf.worker.js with worker-loader
