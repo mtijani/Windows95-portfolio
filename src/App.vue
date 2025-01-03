@@ -90,10 +90,10 @@ export default {
   data() {
     return {
       desktopIcons: [
-        { id: 1, title: "Internship 2022", icon: require("@/assets/bio.png") },
         { id: 2, title: "Internship 2021", icon: require("@/assets/file.png") },
-        { id: 3, title: "My CV  (french)", icon: require("@/assets/photos.png") },
+        { id: 1, title: "Internship 2022", icon: require("@/assets/bio.png") },
         { id: 4, title: "Final Year Project 2024", icon: require("@/assets/folder.png") }, // New icon for Win95PFE
+        { id: 3, title: "My CV  (french)", icon: require("@/assets/photos.png") },
         { id: 5,  title:"Talend", icon:require("@/assets/Talend.png")}
         
       ],

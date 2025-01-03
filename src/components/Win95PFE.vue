@@ -1,55 +1,66 @@
 <template>
   <div class="win95-window">
-      <div class="win95-content">
-          <h3 class="title">Project Overview</h3>
-          <p><strong>Project Title:</strong> Dashboarding and Monitoring of the TMC Platform</p>
-          <p>
-              <strong>Description:</strong> Developed a comprehensive decision-support tool for Talend developers. The project leveraged web technologies, Talend, and MySQL to monitor the Talend Management Cloud (TMC), ensure efficient server surveillance, and provide insights using interactive dashboards.
-          </p>
-          <p><strong>Technologies:</strong> Talend, MySQL, JavaScript, Vue.js, Flask, Prometheus, Grafana, Python, Large Language Models (LLMs), VANNA AI</p>
-          <p><strong>Duration:</strong> 6 months</p>
+    <div class="win95-content">
+      <h1>Dashboarding and Monitoring of the TMC Platform</h1>
+      <p><strong>Title:</strong> Comprehensive Decision-Support Tool for Talend Developers</p>
+      <p><strong>Technologies:</strong> Talend, MySQL, JavaScript, Vue.js, Flask, Prometheus, Grafana, Python, VANNA AI</p>
+      <p>
+        <strong>Project Description:</strong>
+        Developed a platform that enables Talend developers to monitor job performance, server health, and system metrics, providing real-time insights and interactive dashboards for decision-making.
+      </p>
 
-          <h3 class="title">Key Features</h3>
-          <ul>
-              <li>Real-time server metrics collection and visualization using Prometheus and Grafana.</li>
-              <li>Interactive Vue.js dashboards providing decision-making insights, such as identifying the most executed jobs and resource usage trends.</li>
-              <li>Integration of text-to-SQL LLM functionality to query data stored in the data warehouse effortlessly.</li>
-              <li>Custom APIs designed with Flask for backend communication and automation of data retrieval tasks.</li>
-              <li>Data warehousing capabilities to structure and consolidate datasets for efficient reporting.</li>
-              <li>Monitoring job execution frequency, failure rates, and system performance to optimize the TMC platform.</li>
-          </ul>
+      <h2>Key Features</h2>
+      <ul>
+        <li>Real-time monitoring of server and job execution metrics using Prometheus and Grafana.</li>
+        <li>Interactive dashboards built with Vue.js for visualizing performance trends and anomalies.</li>
+        <li>Integration of LLMs for text-to-SQL querying, simplifying data analysis tasks.</li>
+        <li>Custom APIs developed in Flask for efficient backend communication.</li>
+      </ul>
 
-          <h3 class="title">Challenges and Solutions</h3>
-          <p><strong>Challenge:</strong> Ensuring seamless integration between various tools and technologies for end-to-end data monitoring and analysis.</p>
-          <p><strong>Solution:</strong> Utilized Talend for robust ETL processes, Prometheus and Grafana for server metrics visualization, and APIs to connect the backend and frontend efficiently.</p>
-          <p><strong>Challenge:</strong> Building intuitive dashboards to assist decision-making.</p>
-          <p><strong>Solution:</strong> Developed interactive dashboards with Vue.js that provide actionable insights such as execution statistics, performance anomalies, and resource usage patterns.</p>
+      <h2>Screenshots and Descriptions</h2>
+      <div class="image-section">
+        <div class="image-item">
+          <img :src="require('@/assets/PFE/Dashboard.png')" alt="Dashboard Overview" class="screenshot" />
+          <img :src="require('@/assets/PFE/Dashboard2.png')" alt="Dashboard Overview" class="screenshot" />
 
-          <h3 class="title">Learning Outcomes</h3>
-          <ul>
-              <li>In-depth understanding of data integration, ETL processes, and data warehousing using Talend and MySQL.</li>
-              <li>Enhanced skills in building interactive dashboards with Vue.js and Grafana.</li>
-              <li>Experience in designing APIs with Flask for efficient data communication.</li>
-              <li>Proficiency in implementing server surveillance and monitoring solutions with Prometheus and Grafana.</li>
-              <li>Hands-on experience with LLMs and VANNA AI for automating SQL query generation and enhancing data accessibility.</li>
-              <br>
-              <br>
-              <br>
-          </ul>
+          <p><strong>Dashboard Overview:</strong> Displays key performance indicators, including job execution stats and resource utilization.</p>
+        </div>
+        <div class="image-item">
+          <img :src="require('@/assets/PFE/Grafana1.png')" alt="Server Monitoring" class="screenshot" />
+          <img :src="require('@/assets/PFE/Grafana2.png')" alt="Server Monitoring" class="screenshot" />
+
+          <p><strong>Server Monitoring:</strong> Real-time insights into CPU, memory, and disk usage across the infrastructure.</p>
+        </div>
+        <div class="image-item">
+          <img :src="require('@/assets/PFE/JobDetails.png')" alt="Job Execution Details" class="screenshot" />
+          <p><strong>Job Execution Details:</strong> Visualizes job performance, success rates, and common errors.</p>
+        </div>
+        <div class="image-item">
+          <img :src="require('@/assets/PFE/Chatbot.png')" alt="LLM Integration" class="screenshot" />
+          <p><strong>LLM Integration:</strong> Simplifies SQL query generation for data analysis through natural language inputs.</p>
+        </div>
+        <div class="image-item">
+          <img :src="require('@/assets/PFE/Admin.png')" alt="Administrator Platform" class="screenshot" />
+          <p><strong>Administrator Platform:</strong> Controls which dashboards are accessible to specific users based on their roles and permissions.</p>
+        </div>
       </div>
+    </div>
+    <br>
+    <br>
+    <br>
   </div>
 </template>
 
 <script>
 export default {
-  name: "Win95PFE",
+  name: "TMCPlatformDashboard",
 };
 </script>
 
 <style scoped>
 .win95-window {
   width: 100%;
-  height: 100vh; /* Ensure full screen height for the container */
+  height: 100vh;
   background-color: #c0c0c0;
   font-family: "MS Sans Serif", sans-serif;
   display: flex;
@@ -57,57 +68,55 @@ export default {
   overflow: hidden;
 }
 
-.win95-header {
-  background: linear-gradient(to bottom, #000080, #0000a0);
-  color: #fff;
-  padding: 5px 10px;
-  font-size: 14px;
-  text-shadow: 1px 1px #a51c1c;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
 .win95-content {
   flex-grow: 1;
   padding: 10px;
-  overflow-y: auto; /* Ensure scroll when content overflows */
+  overflow-y: auto;
   background-color: #ffffff;
-  height: 100%; /* Ensure full height inside the window */
+  height: 100%;
   scrollbar-width: thin;
   scrollbar-color: #888 #e0e0e0;
 }
 
 .win95-content::-webkit-scrollbar {
-  width: 16px; /* Increased width for thicker scrollbar */
+  width: 16px;
 }
 
 .win95-content::-webkit-scrollbar-thumb {
   background: #888;
-  border-radius: 8px; /* Optional: More rounded thumb */
+  border-radius: 8px;
 }
 
 .win95-content::-webkit-scrollbar-track {
   background: #e0e0e0;
 }
 
-.win95-content h3.title {
-  font-size: 16px;
+.image-section {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.image-item {
+  flex: 1 1 calc(50% - 20px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.screenshot {
+  width: 100%;
+  max-width: 400px;
+  height: auto;
+  border: 2px solid #000080;
   margin-bottom: 10px;
-  color: #000080;
 }
 
-.win95-content p {
-  margin: 5px 0;
-  line-height: 1.6;
-}
-
-.win95-content ul {
-  list-style-type: disc;
-  padding-left: 20px;
-}
-
-.win95-content ul li {
-  margin-bottom: 5px;
+.image-item p {
+  font-size: 14px;
+  color: #333;
+  line-height: 1.4;
 }
 </style>
