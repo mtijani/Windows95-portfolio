@@ -43,6 +43,8 @@
   
   <script>
   export default {
+  methods: {
+  },
     name: "Win95Internship2021",
   };
   </script>

@@ -102,12 +102,12 @@ export default {
       this.isStartMenuOpen = !this.isStartMenuOpen;
     },
     toggleWindow(window) {
-      if (window.isMinimized) {
-        this.$emit("restoreWindow", window.id);
-      } else {
-        this.$emit("toggleWindow", window.id);
-      }
-    },
+  if (window.isMinimized) {
+    this.$emit("restoreWindow", window.id);  // Restore window if minimized
+  } else {
+    this.$emit("activateWindow", window.id); // Activate the window
+  }
+},
     closeWindow(windowId) {
       this.$emit("closeWindow", windowId);
     },

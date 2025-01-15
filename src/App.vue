@@ -44,6 +44,10 @@
   v-if="window.id === 5 && window.title === 'Talend'"
   @closeWindow="closeWindow(window.id)"
 />
+<Win95RefereesProject
+  v-if="window.id === 6 && window.title === 'TFF Bizerte Referees Project'"
+  @closeWindow="closeWindow(window.id)"
+/>
 </template>
     </WindowComponent>
 
@@ -72,9 +76,11 @@ import WindowComponent from "./components/WindowComponent.vue";
 import TaskbarComponent from "./components/TaskbarComponent.vue";
 import StartMenu from "./components/StartMenuComponent.vue";
 import Win95PFE from "./components/Win95PFE.vue";
-import win95Internship2022 from "@/components/Win95Internship2022.vue"
-import Win95Internship2021 from "@/components/Win95Internship2021.vue"
+import win95Internship2022 from "@/components/Win95Internship2022.vue";
+import Win95Internship2021 from "@/components/Win95Internship2021.vue";
 import Wind95TalendComponent from '@/components/Win95TalendComponent.vue';
+import Win95RefereesProject from "@/components/TFF_Bizerte.vue";
+
 
 export default {
   name: "App",
@@ -85,16 +91,18 @@ export default {
     Win95PFE,
     win95Internship2022,
     Win95Internship2021,
-    Wind95TalendComponent
+    Wind95TalendComponent,
+    Win95RefereesProject
   },
   data() {
     return {
       desktopIcons: [
-        { id: 2, title: "Internship 2021", icon: require("@/assets/file.png") },
+        { id: 2, title: "Internship 2021", icon: require("@/assets/photos.png") },
         { id: 1, title: "Internship 2022", icon: require("@/assets/bio.png") },
         { id: 4, title: "Final Year Project 2024", icon: require("@/assets/folder.png") }, // New icon for Win95PFE
-        { id: 3, title: "My CV  (french)", icon: require("@/assets/photos.png") },
-        { id: 5,  title:"Talend", icon:require("@/assets/Talend.png")}
+        { id: 3, title: "My CV  (french)", icon: require("@/assets/file.png") },
+        { id: 5,  title:"Talend", icon:require("@/assets/Talend.png")},
+        {id: 6, title:"TFF Bizerte Referees Project", icon:require("@/assets/video.png")}
         
       ],
       openWindows: [],
@@ -124,6 +132,8 @@ export default {
               ? { type: "custom", component: "Win95PFE" }
               : id === 5 
               ? {type:"custom", component:"Win95TalendComponent"}
+              : id === 6 
+              ? {type:"custom", component:"Win95RefereesProject"}
               : { type: "text", content: `Content of ${this.getWindowTitle(id)}` };
         this.openWindows.push({
           id,
@@ -139,14 +149,19 @@ export default {
       this.isStartMenuOpen = false;
     },
     closeWindow(id) {
-      this.openWindows = this.openWindows.filter((win) => win.id !== id);
-      this.minimizedWindows = this.minimizedWindows.filter(
-        (win) => win.id !== id
-      );
-      this.activeWindowId = this.openWindows.length
-        ? this.openWindows[this.openWindows.length - 1].id
-        : null;
-    },
+  // Find the window with the given ID and remove it from openWindows
+  this.openWindows = this.openWindows.filter((win) => win.id !== id);
+  this.minimizedWindows = this.minimizedWindows.filter(
+    (win) => win.id !== id
+  );
+
+  // If there are still open windows, set the last one as the active window
+  if (this.openWindows.length > 0) {
+    this.activeWindowId = this.openWindows[this.openWindows.length - 1].id;
+  } else {
+    this.activeWindowId = null;
+  }
+},
     minimizeWindow(id) {
       const window = this.openWindows.find((win) => win.id === id);
       if (window) {

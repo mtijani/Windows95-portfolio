@@ -53,6 +53,7 @@
       <win95Internship2022
        v-else-if="window.content.type === 'win95Internship2022'"
       :someProp="window.content.props.someProp"  />
+     
     </div>
   </div>
 </template>
@@ -66,7 +67,7 @@ export default {
   components: {
     Win95PFE, // Register the component here
     win95Internship2022,
-    Win95Internship2021
+    Win95Internship2021,
   },
   props: {
     window: {
@@ -89,34 +90,35 @@ export default {
       this.$emit("maximizeWindow", this.window.id);
     },
     startDrag(event) {
-    if (this.window.isMaximized) return;
+  if (this.window.isMaximized) return; // Prevent drag if maximized
 
-    const isTouch = event.type === "touchstart";
-    const initialMouseX = isTouch ? event.touches[0].clientX : event.clientX;
-    const initialMouseY = isTouch ? event.touches[0].clientY : event.clientY;
-    const { top, left } = this.window.position;
+  const isTouch = event.type === "touchstart";
+  const initialMouseX = isTouch ? event.touches[0].clientX : event.clientX;
+  const initialMouseY = isTouch ? event.touches[0].clientY : event.clientY;
+  const { top, left } = this.window.position;
 
-    const onMove = (e) => {
-      const currentX = isTouch ? e.touches[0].clientX : e.clientX;
-      const currentY = isTouch ? e.touches[0].clientY : e.clientY;
-      const deltaX = currentX - initialMouseX;
-      const deltaY = currentY - initialMouseY;
+  const onMove = (e) => {
+    const currentX = isTouch ? e.touches[0].clientX : e.clientX;
+    const currentY = isTouch ? e.touches[0].clientY : e.clientY;
+    const deltaX = currentX - initialMouseX;
+    const deltaY = currentY - initialMouseY;
 
-      // Emit updated position
-      this.$emit("updateWindowPosition", this.window.id, {
-        top: top + deltaY,
-        left: left + deltaX,
-      });
-    };
+    // Emit updated position
+    this.$emit("updateWindowPosition", this.window.id, {
+      top: top + deltaY,
+      left: left + deltaX,
+    });
+  };
 
-    const onEnd = () => {
-      window.removeEventListener(isTouch ? "touchmove" : "mousemove", onMove);
-      window.removeEventListener(isTouch ? "touchend" : "mouseup", onEnd);
-    };
+  const onEnd = () => {
+    window.removeEventListener(isTouch ? "touchmove" : "mousemove", onMove);
+    window.removeEventListener(isTouch ? "touchend" : "mouseup", onEnd);
+  };
 
-    window.addEventListener(isTouch ? "touchmove" : "mousemove", onMove);
-    window.addEventListener(isTouch ? "touchend" : "mouseup", onEnd);
-  },
+  window.addEventListener(isTouch ? "touchmove" : "mousemove", onMove);
+  window.addEventListener(isTouch ? "touchend" : "mouseup", onEnd);
+}
+
 },
 
 };
@@ -189,6 +191,14 @@ export default {
 .window-buttons .close-btn::before {
   content: "X";
   font-weight: bold;
+}
+
+.window.maximized {
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 999; /* Bring to front */
 }
 
 /* Window Content */
